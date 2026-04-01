@@ -29,4 +29,7 @@ RUN php artisan config:cache
 RUN php artisan route:cache
 
 # Run server
-CMD mkdir -p database && touch database/database.sqlite && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
+CMD mkdir -p database && \
+    touch database/database.sqlite && \
+    php artisan migrate --force && \
+    php -S 0.0.0.0:$PORT -t public
