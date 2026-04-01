@@ -29,7 +29,9 @@ RUN php artisan config:cache
 RUN php artisan route:cache
 
 # Run server
-CMD mkdir -p database && \
+CMD cp .env.example .env && \
+    php artisan key:generate && \
+    mkdir -p database && \
     touch database/database.sqlite && \
     php artisan migrate --force && \
     php -S 0.0.0.0:$PORT -t public
