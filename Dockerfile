@@ -22,8 +22,5 @@ RUN composer install --no-dev --optimize-autoloader
 # Create sqlite DB
 RUN touch database/database.sqlite
 
-# Generate app key
-RUN php artisan key:generate
-
 # Run server
 CMD php artisan serve --host=0.0.0.0 --port=10000
