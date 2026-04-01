@@ -28,10 +28,10 @@ RUN php artisan migrate --force
 RUN php artisan config:cache
 RUN php artisan route:cache
 
+ENV APP_KEY=base64:0FYFqVlS7NVBC2ygcwyp7ExfWgZGHYrFHE7BcM1oNy8=
+
 # Run server
-CMD cp .env.example .env && \
-    php artisan key:generate && \
-    mkdir -p database && \
+CMD mkdir -p database && \
     touch database/database.sqlite && \
     php artisan migrate --force && \
     php -S 0.0.0.0:$PORT -t public
