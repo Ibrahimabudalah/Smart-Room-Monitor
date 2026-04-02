@@ -29,8 +29,12 @@ class SensorController extends Controller
         return SensorReading::latest()->first();
     }
 
-    public function history()
+    public function history(Request $request)
     {
-        return SensorReading::latest()->take(50)->get();
+        $hours = $request->query('hours', 1);
+
+        return SensorReading::where('created_at', '>=', now()->subHours($hours))
+            ->orderByDesc('created_at')
+            ->get();
     }
 }
