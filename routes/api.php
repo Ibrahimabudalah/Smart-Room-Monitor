@@ -9,4 +9,6 @@ Route::get('/sensor/history', [SensorController::class, 'history']);
 
 Route::prefix('ai')->group(function () {
     Route::get('/insights', [SensorController::class, 'getInsights']);
+    Route::get('/predict', [SensorController::class, 'getPrediction']);
+    Route::get('/chat', [SensorController::class, 'chat']);
 });
