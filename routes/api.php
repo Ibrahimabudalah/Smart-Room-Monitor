@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\SensorController;
 
@@ -8,7 +9,7 @@ Route::get('/sensor/latest', [SensorController::class, 'latest']);
 Route::get('/sensor/history', [SensorController::class, 'history']);
 
 Route::prefix('ai')->group(function () {
-    Route::get('/insights', [SensorController::class, 'getInsights']);
-    Route::get('/predict', [SensorController::class, 'getPrediction']);
-    Route::get('/chat', [SensorController::class, 'chat']);
+    Route::get('/insights', [AiController::class, 'getInsights']);
+    Route::get('/predict', [AiController::class, 'getPrediction']);
+    Route::get('/chat', [AiController::class, 'chat']);
 });
