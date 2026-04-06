@@ -17,8 +17,7 @@ class AiController extends Controller
     {
         $latestReading = SensorReading::latest()->first();
 
-        if (!$latestReading) 
-        {
+        if (!$latestReading) {
             return response()->json(['error' => 'No sensor data available'], 404);
         }
 
@@ -26,8 +25,7 @@ class AiController extends Controller
             'Authorization' => 'Bearer ' . config('services.github.token'),
             'Content-Type' => 'application/json',
         ])->post('https://models.github.ai/inference/chat/completions', [
-            'model' => 'gpt-5.4-mini',
-            'response_format' => [ "type" => "json_object" ],
+            'model' => 'gpt-4o-mini',
             'messages' => [
                 [
                     'role' => 'system',
@@ -60,8 +58,7 @@ class AiController extends Controller
     {
         $dataHistory = SensorReading::latest()->take(20)->get()->reverse()->values();
 
-        if ($dataHistory->isEmpty()) 
-        {
+        if ($dataHistory->isEmpty()) {
             return response()->json(['error' => 'No enough sensor data to predict'], 404);
         }
 
@@ -71,7 +68,7 @@ class AiController extends Controller
                 'temp' => $reading->temperature,
                 'humidity' => $reading->humidity,
                 'pressure' => $reading->pressure,
-                'time' => $reading->created_at ? $reading->created_at->format('H:i') : 'unknown' 
+                'time' => $reading->created_at ? $reading->created_at->format('H:i') : 'unknown'
             ];
         });
 
@@ -79,8 +76,7 @@ class AiController extends Controller
             'Authorization' => 'Bearer ' . config('services.github.token'),
             'Content-Type' => 'application/json',
         ])->post('https://models.github.ai/inference/chat/completions', [
-            'model' => 'gpt-5.4-mini',
-            'response_format' => [ "type" => "json_object" ],
+            'model' => 'gpt-4o-mini',
             'messages' => [
                 [
                     'role' => 'system',
@@ -100,7 +96,7 @@ class AiController extends Controller
 
         return response()->json(['error' => 'AI request failed'], 500);
     }
-    
+
     /**
      * A chat the user can ask questions about room climate conditions based on their data.
      * @param Request $request - the message the user wants to ask AI
@@ -116,16 +112,15 @@ class AiController extends Controller
         $latestReading = SensorReading::latest()->first();
 
         //Check if there's sensor data available to read
-        $climateContext = $latestReading 
-            ? "Current room conditions - Temp: {$latestReading->temperature}°C, Humidity: {$latestReading->humidity}%, Pressure: {$latestReading->pressure}hPa." 
+        $climateContext = $latestReading
+            ? "Current room conditions - Temp: {$latestReading->temperature}°C, Humidity: {$latestReading->humidity}%, Pressure: {$latestReading->pressure}hPa."
             : "Sensor data is currently unavailable.";
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . config('services.github.token'),
             'Content-Type' => 'application/json',
         ])->post('https://models.github.ai/inference/chat/completions', [
-            'model' => 'gpt-5.4-mini',
-            'response_format' => [ "type" => "json_object" ],
+            'model' => 'gpt-4o-mini',
             'messages' => [
                 [
                     'role' => 'system',
