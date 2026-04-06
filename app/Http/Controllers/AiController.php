@@ -56,7 +56,7 @@ class AiController extends Controller
                 return response()->json(['error' => 'No sensor data available in database'], 404);
             }
 
-            // Check config FIRST, then fallback to ENV directly (common fix for Render/Heroku)
+            // Check config FIRST, then fallback to ENV directly
             $token = config('services.github.token') ?? env('GITHUB_TOKEN');
 
             if (empty($token)) {
@@ -88,7 +88,7 @@ class AiController extends Controller
 
             $aiData = $this->parseAiResponse($response);
 
-            // If the parser returned an array with error_detail, it failed
+            // If the parser returned an array with error_detail, it fail
             if (isset($aiData['error_detail'])) {
                 return response()->json([
                     'error' => 'AI Processing Failed',
@@ -98,13 +98,107 @@ class AiController extends Controller
 
             return response()->json($aiData, 200);
         } catch (\Exception $e) {
-            // This prevents the White Screen by catching the fatal error
+            // Catching res error
             return response()->json([
                 'error' => 'Controller Crash',
                 'exception' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ], 500);
+        }
+    }
+
+    /**
+     * Predicts future conditions based on the last 20 sensor readings.
+     */
+    public function getPrediction()
+    {
+        try {
+            $dataHistory = SensorReading::latest()->take(20)->get()->reverse()->values();
+
+            if ($dataHistory->isEmpty()) {
+                return response()->json(['error' => 'Not enough data'], 404);
+            }
+
+            $formattedData = $dataHistory->map(fn($r) => [
+                'temp' => $r->temperature,
+                'hum' => $r->humidity,
+                'pres' => $r->pressure,
+                'time' => $r->created_at ? $r->created_at->format('H:i') : 'unknown'
+            ]);
+
+            $token = config('services.github.token') ?? env('GITHUB_TOKEN');
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type' => 'application/json',
+            ])->timeout(45)->post('https://models.github.ai/inference/chat/completions', [
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are a smart room predictive AI. Analyze the trajectory of the temperature, humidity, and pressure. Return a JSON object with keys: "trend" (string), "estimated_temp_in_1_hour" (number), and "advice" (string).'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => 'Historical data: ' . json_encode($formattedData)
+                    ]
+                ]
+            ]);
+
+            $aiData = $this->parseAiResponse($response);
+
+            if (isset($aiData['error_detail'])) {
+                return response()->json(['error' => 'AI Prediction Failed', 'debug' => $aiData], 500);
+            }
+
+            return response()->json($aiData, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Prediction Crash', 'exception' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Chat interface for user questions about room climate.
+     */
+    public function chat(Request $request)
+    {
+        try {
+            $request->validate(['message' => 'required|string|max:500']);
+
+            $latestReading = SensorReading::latest()->first();
+            $climateContext = $latestReading
+                ? "Current conditions - Temp: {$latestReading->temperature}°C, Humidity: {$latestReading->humidity}%, Pressure: {$latestReading->pressure}hPa."
+                : "Sensor data is currently unavailable.";
+
+            $token = config('services.github.token') ?? env('GITHUB_TOKEN');
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type' => 'application/json',
+            ])->timeout(45)->post('https://models.github.ai/inference/chat/completions', [
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => "You are a helpful smart room assistant. $climateContext Answer the user's question concisely. Return a JSON object with exactly one key: 'reply'."
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $request->input('message')
+                    ]
+                ]
+            ]);
+
+            $aiData = $this->parseAiResponse($response);
+
+            if (isset($aiData['error_detail'])) {
+                return response()->json(['error' => 'AI Chat Failed', 'debug' => $aiData], 500);
+            }
+
+            return response()->json($aiData, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Chat Crash', 'exception' => $e->getMessage()], 500);
         }
     }
 }
