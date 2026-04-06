@@ -43,11 +43,22 @@ class AiController extends Controller
         ]);
 
         if ($response->successful()) {
-            $aiData = json_decode($response->json('choices.0.message.content'));
+            $content = $response->json('choices.0.message.content');
+
+            // remove markdown code blocks if they exist
+            $cleanJson = preg_replace('/^```json|```$/m', '', $content);
+
+            $aiData = json_decode(trim($cleanJson));
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json([
+                    'error' => 'AI returned invalid JSON',
+                    'raw_content' => $content
+                ], 500);
+            }
+
             return response()->json($aiData, 200);
         }
-
-        return response()->json(['error' => 'AI request failed'], 500);
     }
 
     /**
@@ -90,11 +101,22 @@ class AiController extends Controller
         ]);
 
         if ($response->successful()) {
-            $aiData = json_decode($response->json('choices.0.message.content'));
+            $content = $response->json('choices.0.message.content');
+
+            // remove markdown code blocks if they exist
+            $cleanJson = preg_replace('/^```json|```$/m', '', $content);
+
+            $aiData = json_decode(trim($cleanJson));
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json([
+                    'error' => 'AI returned invalid JSON',
+                    'raw_content' => $content
+                ], 500);
+            }
+
             return response()->json($aiData, 200);
         }
-
-        return response()->json(['error' => 'AI request failed'], 500);
     }
 
     /**
@@ -134,10 +156,21 @@ class AiController extends Controller
         ]);
 
         if ($response->successful()) {
-            $aiData = json_decode($response->json('choices.0.message.content'));
+            $content = $response->json('choices.0.message.content');
+
+            // remove markdown code blocks if they exist
+            $cleanJson = preg_replace('/^```json|```$/m', '', $content);
+
+            $aiData = json_decode(trim($cleanJson));
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json([
+                    'error' => 'AI returned invalid JSON',
+                    'raw_content' => $content
+                ], 500);
+            }
+
             return response()->json($aiData, 200);
         }
-
-        return response()->json(['error' => 'AI chat failed'], 500);
     }
 }
