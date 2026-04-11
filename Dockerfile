@@ -24,7 +24,7 @@ RUN touch database/database.sqlite
 
 RUN chmod -R 777 storage bootstrap/cache database
 
-RUN php artisan migrate --force
+RUN php artisan migrate --force && php artisan db:seed --force
 RUN php artisan config:cache
 RUN php artisan route:cache
 
@@ -33,5 +33,6 @@ ENV APP_KEY=base64:0FYFqVlS7NVBC2ygcwyp7ExfWgZGHYrFHE7BcM1oNy8=
 # Run server
 CMD mkdir -p database && \
     touch database/database.sqlite && \
-    php artisan migrate --force --seed && \
+    php artisan migrate --force && \
+    php artisan db:seed --force && \
     php -S 0.0.0.0:$PORT -t public
