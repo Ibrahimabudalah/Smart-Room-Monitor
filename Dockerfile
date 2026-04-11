@@ -19,20 +19,21 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Create sqlite DB
-RUN touch database/database.sqlite
+# Create SQLite DB
+RUN mkdir -p database && touch database/database.sqlite
 
+# Permissions
 RUN chmod -R 777 storage bootstrap/cache database
 
-RUN php artisan migrate --force && php artisan db:seed --force
-RUN php artisan config:cache
-RUN php artisan route:cache
+# ⚠️ DO NOT run migrate here (build stage)
+
+# Cache configs
+RUN php artisan config:clear
+RUN php artisan cache:clear
 
 ENV APP_KEY=base64:0FYFqVlS7NVBC2ygcwyp7ExfWgZGHYrFHE7BcM1oNy8=
 
-# Run server
-CMD mkdir -p database && \
-    touch database/database.sqlite && \
-    php artisan migrate --force && \
+# 🚀 Run server + migrate + seed at runtime
+CMD php artisan migrate --force && \
     php artisan db:seed --force && \
     php -S 0.0.0.0:$PORT -t public
