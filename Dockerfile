@@ -33,5 +33,5 @@ ENV APP_KEY=base64:0FYFqVlS7NVBC2ygcwyp7ExfWgZGHYrFHE7BcM1oNy8=
 # Run server
 CMD mkdir -p database && \
     touch database/database.sqlite && \
-    php artisan migrate --force && \
+    php artisan migrate --force --seed && \
     php -S 0.0.0.0:$PORT -t public
