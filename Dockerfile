@@ -17,13 +17,11 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN mkdir -p database && touch database/database.sqlite
 
-RUN php artisan config:cache
-
-RUN php artisan route:cache
-
 RUN chmod -R 777 storage bootstrap/cache database
 
 ENV APP_KEY=base64:0FYFqVlS7NVBC2ygcwyp7ExfWgZGHYrFHE7BcM1oNy8=
+
+RUN php artisan config:clear
 
 CMD php artisan migrate --force && \
     php artisan db:seed --force && \
