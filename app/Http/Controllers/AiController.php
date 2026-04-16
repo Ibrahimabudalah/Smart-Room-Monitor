@@ -70,7 +70,7 @@ class AiController extends Controller
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
             ])->timeout(45)->post('https://models.github.ai/inference/chat/completions', [
-                'model' => 'gpt-4o-mini',
+                'model' => 'gpt-5-mini',
                 'messages' => [
                     [
                         'role' => 'system',
@@ -133,7 +133,7 @@ class AiController extends Controller
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
             ])->timeout(45)->post('https://models.github.ai/inference/chat/completions', [
-                'model' => 'gpt-4o-mini',
+                'model' => 'gpt-5-mini',
                 'messages' => [
                     [
                         'role' => 'system',
@@ -177,7 +177,7 @@ class AiController extends Controller
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
             ])->timeout(45)->post('https://models.github.ai/inference/chat/completions', [
-                'model' => 'gpt-4o-mini',
+                'model' => 'gpt-5-mini',
                 'messages' => [
                     [
                         'role' => 'system',
