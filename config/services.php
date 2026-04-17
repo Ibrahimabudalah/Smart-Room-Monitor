@@ -35,8 +35,16 @@ return [
         ],
     ],
 
-    'github' => [
-        'token' => env('GITHUB_TOKEN'),
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash-lite'),
+        'ca_bundle' => env('GEMINI_CA_BUNDLE', storage_path('certs/cacert.pem')),
+        'verify_ssl' => env('GEMINI_VERIFY_SSL', true),
+    ],
+
+    'ai_sensor_data' => [
+        'source' => env('AI_SENSOR_DATA_SOURCE'),
+        'mock_path' => storage_path('app/private/mock_sensor_readings.json'),
     ],
 
 ];
